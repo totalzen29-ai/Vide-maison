@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>VideMaison.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body,#root{height:100%;background:#FFFBF0}
+    body{font-family:'Nunito',sans-serif;-webkit-font-smoothing:antialiased}
+    .app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:#FFFBF0}
+    .header{background:#fff;border-bottom:2px solid #E8E0D0;padding:12px 16px 0;position:sticky;top:0;z-index:100}
+    .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .logo{font-size:22px;font-weight:900;letter-spacing:-0.5px}
+    .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin:0 1px;vertical-align:middle}
+    .d1{background:#FFD600}.d2{background:#FF6B00}.d3{background:#FF3D8B}
+    .header-pills{display:flex;gap:6px}
+    .hpill{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:800}
+    .hpill.yellow{background:#FFF9C4;color:#FF6B00}
+    .hpill.green{background:#DCFCE7;color:#16A34A;cursor:pointer}
+    .tabs{display:flex;gap:4px;overflow-x:auto;padding:0 4px 10px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex-shrink:0;padding:7px 14px;border-radius:20px;border:2px solid #E8E0D0;background:#fff;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;color:#1A1A1A}
+    .tab.active{color:#fff;border-color:transparent}
+    .content{flex:1;padding:16px;padding-bottom:90px}
+    .section-title{font-size:18px;font-weight:900;margin-bottom:14px;color:#1A1A1A}
+    .mode-pills{display:flex;gap:8px;margin-bottom:16px}
+    .mode-pill{flex:1;padding:10px;border-radius:12px;border:2px solid #E8E0D0;background:#fff;font-size:12px;font-weight:800;cursor:pointer;text-align:center;font-family:'Nunito',sans-serif;color:#1A1A1A}
+    .mode-pill.active{border-color:#FF3D8B;background:#FFD6E8;color:#FF3D8B}
+    .analyzing-bar{height:6px;background:#E8E0D0;border-radius:3px;overflow:hidden;margin:12px 0}
+    .analyzing-fill{height:100%;background:linear-gradient(90deg,#FF3D8B,#7C3AED);border-radius:3px;animation:scan-anim 1.5s ease-in-out infinite}
+    @keyframes scan-anim{0%{width:0}60%{width:80%}100%{width:100%}}
+    .scan-result{background:#DCFCE7;border-radius:12px;padding:12px;margin-top:12px;font-size:13px;font-weight:700;color:#16A34A}
+    .filter-bar{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+    .filter-bar::-webkit-scrollbar{display:none}
+    .fbtn{flex-shrink:0;padding:6px 14px;border-radius:20px;border:2px solid #E8E0D0;background:#fff;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#1A1A1A}
+    .fbtn.active{background:#7C3AED;color:#fff;border-color:#7C3AED}
+    .item-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:10px;border:2px solid #E8E0D0;display:flex;gap:12px;align-items:center;cursor:pointer;transition:border-color .15s}
+    .item-card:hover{border-color:#7C3AED}
+    .item-card.selected{border-color:#7C3AED;background:#EDE9FE}
+    .item-emoji{font-size:32px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#FFFBF0;border-radius:12px;flex-shrink:0}
+    .item-info{flex:1;min-width:0}
+    .item-name{font-size:14px;font-weight:800;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#1A1A1A}
+    .item-meta{font-size:12px;color:#6B7280;margin-bottom:4px}
+    .item-price{font-size:16px;font-weight:900;color:#16A34A}
+    .item-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:900;margin-left:6px}
+    .badge-rare{background:#FFF9C4;color:#FF6B00}
+    .badge-lot{background:#EDE9FE;color:#7C3AED}
+    .score-bar{background:#E8E0D0;border-radius:3px;overflow:hidden}
+    .score-fill{height:4px;background:linear-gradient(90deg,#FFD600,#16A34A);border-radius:3px}
+    .sel-count{font-size:12px;color:#6B7280;margin-bottom:8px;font-weight:700}
+    .panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end}
+    .panel{background:#fff;border-radius:24px 24px 0 0;padding:24px 20px;width:100%;max-height:85vh;overflow-y:auto}
+    .panel-emoji{font-size:48px;margin-bottom:8px}
+    .panel-name{font-size:20px;font-weight:900;margin-bottom:2px;color:#1A1A1A}
+    .panel-cat{font-size:13px;color:#6B7280;margin-bottom:16px;font-weight:600}
+    .field-group{margin-bottom:16px}
+    .field-label{font-size:12px;font-weight:800;color:#6B7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+    .field-input{width:100%;border:2px solid #E8E0D0;border-radius:10px;padding:10px 12px;font-size:14px;font-family:'Nunito',sans-serif;resize:none;outline:none;color:#1A1A1A}
+    .field-input:focus{border-color:#7C3AED}
+    .price-input-wrap{display:flex;align-items:center;border:2px solid #E8E0D0;border-radius:10px;padding:0 12px;background:#fff}
+    .price-input-wrap input{border:none;outline:none;font-size:20px;font-weight:900;font-family:'Nunito',sans-serif;padding:10px 0 10px 8px;flex:1;color:#1A1A1A}
+    .currency{font-size:20px;font-weight:900;color:#6B7280}
+    .fees-breakdown{background:#FFFBF0;border-radius:10px;padding:10px 12px}
+    .fee-row{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:4px;color:#6B7280}
+    .fee-row.total{color:#16A34A;font-weight:900;font-size:14px;margin-bottom:0}
+    .btn-close-panel{width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#FF3D8B,#7C3AED);color:#fff;font-size:15px;font-weight:900;border:none;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:8px}
+    .tips{display:flex;flex-direction:column;gap:6px}
+    .tip{background:#FFF9C4;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:700;color:#FF6B00}
+    .plat-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:10px;border:2px solid #E8E0D0;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .15s}
+    .plat-card.active{border-color:#FF6B00;background:#FFE0CC}
+    .plat-emoji{font-size:28px}
+    .plat-name{font-size:15px;font-weight:800;flex:1;color:#1A1A1A}
+    .plat-fee{font-size:13px;font-weight:700;color:#6B7280}
+    .plat-check{width:22px;height:22px;border-radius:50%;border:2.5px solid #E8E0D0;display:flex;align-items:center;justify-content:center;font-size:13px}
+    .plat-check.on{background:#FF6B00;border-color:#FF6B00;color:#fff}
+    .pub-summary{background:#fff;border-radius:16px;padding:16px;border:2px solid #E8E0D0;margin-bottom:16px}
+    .pub-row{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:8px;color:#1A1A1A}
+    .btn-publish{width:100%;padding:16px;border-radius:16px;background:linear-gradient(135deg,#FF6B00,#FF3D8B);color:#fff;font-size:16px;font-weight:900;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+    .market-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:10px;border:2px solid #E8E0D0}
+    .market-title{font-size:15px;font-weight:800;margin-bottom:10px;color:#1A1A1A}
+    .trend-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #E8E0D0;font-size:13px;color:#1A1A1A}
+    .trend-row:last-child{border-bottom:none}
+    .trend-up{color:#16A34A;font-weight:800}
+    .trend-down{color:#EF4444;font-weight:800}
+    .alert-card{background:#FFF9C4;border-radius:16px;padding:14px;margin-bottom:10px;border:2px solid #FFD600}
+    .alert-title{font-size:14px;font-weight:900;color:#FF6B00;margin-bottom:4px}
+    .alert-text{font-size:13px;font-weight:600;color:#1A1A1A}
+    .slot-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .slot{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800}
+    .slot.best{background:#DCFCE7;color:#16A34A}
+    .slot.ok{background:#FFFBF0;color:#6B7280;border:1.5px solid #E8E0D0}
+    .room-block{margin-bottom:20px}
+    .room-label{font-size:14px;font-weight:900;margin-bottom:8px;color:#1A1A1A}
+    .check-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fff;border-radius:12px;margin-bottom:6px;border:2px solid #E8E0D0;cursor:pointer}
+    .check-box{width:20px;height:20px;border-radius:6px;border:2.5px solid #E8E0D0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
+    .check-box.done{background:#16A34A;border-color:#16A34A;color:#fff}
+    .check-label{font-size:13px;font-weight:700;color:#1A1A1A}
+    .check-label.done{text-decoration:line-through;color:#6B7280}
+    .progress-bar{height:8px;background:#E8E0D0;border-radius:4px;overflow:hidden;margin-bottom:16px}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#16A34A,#0EA5E9);border-radius:4px;transition:width .3s}
+    .pub-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:2px solid #E8E0D0;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;z-index:99}
+    .bar-stat{font-size:13px;font-weight:800;color:#1A1A1A}
+    .bar-val{font-size:16px;font-weight:900;color:#16A34A}
+    .success-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:20px}
+    .success-icon{font-size:72px;margin-bottom:16px;animation:bounce .6s ease}
+    @keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+    .success-title{font-size:24px;font-weight:900;margin-bottom:8px;color:#1A1A1A}
+    .success-sub{font-size:15px;color:#6B7280;font-weight:600;margin-bottom:24px}
+    .btn-reset{padding:14px 28px;border-radius:14px;background:linear-gradient(135deg,#FFD600,#FF6B00);color:#fff;font-size:15px;font-weight:900;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+    .auth-wrap{position:fixed;inset:0;background:#FFFBF0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+    .auth-logo{font-size:32px;font-weight:900;margin-bottom:6px;text-align:center}
+    .auth-sub{font-size:14px;color:#6B7280;font-weight:600;margin-bottom:24px;text-align:center}
+    .auth-tabs{display:flex;background:#E8E0D0;border-radius:12px;padding:4px;margin-bottom:20px;width:100%;max-width:360px}
+    .auth-tab{flex:1;padding:9px;border-radius:9px;border:none;background:transparent;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;color:#6B7280}
+    .auth-tab.active{background:#fff;color:#FF3D8B;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .auth-form{width:100%;max-width:360px;background:#fff;border-radius:20px;padding:20px;border:2px solid #E8E0D0}
+    .auth-label{font-size:12px;font-weight:800;color:#6B7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px;display:block}
+    .auth-input{width:100%;border:2px solid #E8E0D0;border-radius:10px;padding:11px 13px;font-size:14px;font-family:'Nunito',sans-serif;outline:none;background:#FFFBF0;color:#1A1A1A}
+    .auth-input:focus{border-color:#7C3AED;background:#fff}
+    .auth-err{color:#EF4444;font-size:12px;font-weight:700;margin-top:4px;margin-bottom:8px}
+    .auth-field{margin-bottom:14px}
+    .btn-auth{width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#FF3D8B,#7C3AED);color:#fff;font-size:15px;font-weight:900;border:none;cursor:pointer;font-family:'Nunito',sans-serif;margin-bottom:14px;margin-top:4px}
+    .btn-auth:disabled{opacity:.6;cursor:not-allowed}
+    .auth-divider{text-align:center;font-size:12px;color:#9CA3AF;font-weight:700;margin-bottom:12px}
+    .btn-social{width:100%;padding:12px;border-radius:12px;border:2px solid #E8E0D0;background:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:10px;color:#1A1A1A}
+    .auth-legal{font-size:11px;color:#9CA3AF;text-align:center;margin-top:12px;line-height:1.5}
+    .profile-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#FF3D8B,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:900;margin-bottom:12px}
+    .profile-name{font-size:20px;font-weight:900;margin-bottom:2px;color:#1A1A1A}
+    .profile-meta{font-size:13px;color:#6B7280;font-weight:600;margin-bottom:20px}
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+    .stat-box{background:#fff;border-radius:14px;padding:12px;text-align:center;border:2px solid #E8E0D0}
+    .stat-num{font-size:22px;font-weight:900;color:#1A1A1A}
+    .stat-lbl{font-size:11px;color:#6B7280;font-weight:700}
+    .profile-section{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:2px solid #E8E0D0}
+    .profile-section-title{font-size:12px;font-weight:900;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+    .profile-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #E8E0D0;font-size:14px;font-weight:700;cursor:pointer;color:#1A1A1A}
+    .profile-row:last-child{border-bottom:none}
+    .btn-logout{width:100%;padding:13px;border-radius:14px;border:2px solid #E8E0D0;background:#fff;color:#EF4444;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:4px}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useCallback } = React;
+
+    const ITEMS_INIT = [
+      {id:1,name:"Canapé 3 places",cat:"Meuble",state:"Bon état",price:180,fee:18,profit:162,score:88,desc:"Canapé en tissu gris anthracite, très bon état.",badge:"rare",emoji:"🛋️",tips:["Ajouter mesures","Photo sur fond clair"],platforms:["leboncoin","facebook"],sold:false},
+      {id:2,name:"Table basse bois",cat:"Meuble",state:"Bon état",price:65,fee:6,profit:59,score:74,desc:"Table basse en chêne massif.",badge:null,emoji:"🪵",tips:["Mentionner les dimensions"],platforms:["leboncoin"],sold:false},
+      {id:3,name:"Lot vaisselle",cat:"Cuisine",state:"Bon état",price:25,fee:2,profit:23,score:61,desc:"Service complet 6 personnes.",badge:"lot",emoji:"🍽️",tips:["Photo de l'ensemble"],platforms:["leboncoin","vinted"],sold:false},
+      {id:4,name:"Lampe design",cat:"Déco",state:"Comme neuf",price:45,fee:4,profit:41,score:82,desc:"Lampe à poser, style scandinave.",badge:null,emoji:"💡",tips:["Photo allumée"],platforms:["facebook","vinted"],sold:false},
+      {id:5,name:"Vélo adulte",cat:"Sport",state:"Usagé",price:80,fee:8,profit:72,score:70,desc:"Vélo de ville 7 vitesses.",badge:null,emoji:"🚲",tips:["Indiquer taille cadre"],platforms:["leboncoin"],sold:false},
+    ];
+
+    const CHECKLIST = [
+      {id:"c1",room:"Salon",label:"Canapé / fauteuils"},{id:"c2",room:"Salon",label:"Table basse"},
+      {id:"c3",room:"Salon",label:"Meubles TV / étagères"},{id:"c4",room:"Chambre",label:"Literie / matelas"},
+      {id:"c5",room:"Chambre",label:"Armoires / commodes"},{id:"c6",room:"Cuisine",label:"Électroménager"},
+      {id:"c7",room:"Cuisine",label:"Vaisselle / ustensiles"},{id:"c8",room:"Bureau",label:"Bureaux / chaises"},
+      {id:"c9",room:"Bureau",label:"Électronique"},{id:"c10",room:"Divers",label:"Livres / déco"},
+    ];
+
+    const PLATFORMS = [
+      {id:"leboncoin",name:"LeBonCoin",fee:"8%",emoji:"🟠"},
+      {id:"facebook",name:"Facebook Marketplace",fee:"0%",emoji:"🔵"},
+      {id:"vinted",name:"Vinted",fee:"5%",emoji:"🟢"},
+      {id:"ebay",name:"eBay",fee:"10%",emoji:"🔴"},
+    ];
+
+    const FAKE_ITEMS = [
+      {name:"Miroir doré",cat:"Déco",emoji:"🪞",tips:["Photo sur fond neutre"]},
+      {name:"Chaise vintage",cat:"Meuble",emoji:"🪑",tips:["Mentionner l'état du tissu"]},
+      {name:"Étagère bois",cat:"Meuble",emoji:"🪵",tips:["Photo de face et de profil"]},
+      {name:"Vélo enfant",cat:"Sport",emoji:"🚲",tips:["Indiquer la taille du cadre"]},
+      {name:"Machine à café",cat:"Électroménager",emoji:"☕",tips:["Préciser la marque"]},
+      {name:"Tableau abstrait",cat:"Déco",emoji:"🖼️",tips:["Photo bien éclairée"]},
+      {name:"Lampe de bureau",cat:"Déco",emoji:"🔦",tips:["Photo allumée et éteinte"]},
+      {name:"Aspirateur robot",cat:"Électroménager",emoji:"🤖",tips:["Vérifier accessoires"]},
+      {name:"Table de jardin",cat:"Jardin",emoji:"🌿",tips:["Mesures et matériau"]},
+      {name:"Console de jeux",cat:"Électronique",emoji:"🎮",tips:["Lister les jeux inclus"]},
+    ];
+
+    const TC = {scan:"#FF3D8B",inventory:"#7C3AED",publish:"#FF6B00",market:"#0EA5E9",org:"#16A34A",profile:"#7C3AED"};
+
+    function App() {
+      const [user, setUser] = useState(null);
+      const [authMode, setAuthMode] = useState("signup");
+      const [authForm, setAuthForm] = useState({prenom:"",nom:"",email:"",password:"",ville:""});
+      const [authErr, setAuthErr] = useState({});
+      const [authLoading, setAuthLoading] = useState(false);
+      const [tab, setTab] = useState("scan");
+      const [items, setItems] = useState(ITEMS_INIT);
+      const [selected, setSelected] = useState(new Set([1,2,3,4,5]));
+      const [filter, setFilter] = useState("all");
+      const [detail, setDetail] = useState(null);
+      const [platforms, setPlatforms] = useState(new Set(["leboncoin","facebook"]));
+      const [checks, setChecks] = useState(new Set());
+      const [analyzing, setAnalyzing] = useState(false);
+      const [mode, setMode] = useState("max");
+      const [newCount, setNewCount] = useState(0);
+
+      const sf = (k,v) => setAuthForm(p=>({...p,[k]:v}));
+
+      const handleAuth = async () => {
+        const e = {};
+        if (authMode==="signup" && !authForm.prenom.trim()) e.prenom="Prénom requis";
+        if (!authForm.email.includes("@")) e.email="Email invalide";
+        if (authForm.password.length<6) e.password="6 caractères minimum";
+        if (Object.keys(e).length) { setAuthErr(e); return; }
+        setAuthLoading(true);
+        await new Promise(r=>setTimeout(r,700));
+        setUser({prenom:authForm.prenom||"Utilisateur",nom:authForm.nom,email:authForm.email,ville:authForm.ville||"France",since:"Juin 2026"});
+        setAuthLoading(false);
+      };
+
+      const handleSocial = async (p) => {
+        setAuthLoading(true);
+        await new Promise(r=>setTimeout(r,500));
+        setUser({prenom:p==="google"?"Alex":"Sam",nom:"",email:`user@${p}.com`,ville:"Paris",since:"Juin 2026"});
+        setAuthLoading(false);
+      };
+
+      const simulateScan = useCallback(async (count) => {
+        setAnalyzing(true);
+        await new Promise(r=>setTimeout(r,1400));
+        const added = [];
+        for (let k=0;k<count;k++) {
+          const t = FAKE_ITEMS[Math.floor(Math.random()*FAKE_ITEMS.length)];
+          const price=15+Math.floor(Math.random()*130);
+          const fee=Math.round(price*.08);
+          added.push({id:Date.now()+Math.random(),...t,state:"Bon état",price,fee,profit:price-fee,score:55+Math.floor(Math.random()*40),desc:t.name+" en bon état.",badge:Math.random()>.85?"rare":null,platforms:["leboncoin"],sold:false});
+        }
+        setItems(p=>[...added,...p]);
+        setSelected(p=>{const n=new Set(p);added.forEach(a=>n.add(a.id));return n;});
+        setNewCount(c=>c+added.length);
+        setAnalyzing(false);
+      },[]);
+
+      const toggleSel = id => setSelected(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
+      const togglePlat = id => setPlatforms(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
+      const toggleCheck = id => setChecks(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
+
+      const selItems = items.filter(it=>selected.has(it.id));
+      const totalVal = selItems.reduce((s,it)=>s+it.price,0);
+      const totalProfit = selItems.reduce((s,it)=>s+it.profit,0);
+      const filtItems = items.filter(it=>{
+        if(filter==="all") return true;
+        if(filter==="sel") return selected.has(it.id);
+        if(filter==="rare") return it.badge==="rare";
+        if(filter==="lot") return it.badge==="lot";
+        return true;
+      });
+      const rooms = [...new Set(CHECKLIST.map(c=>c.room))];
+      const clDone = CHECKLIST.filter(c=>checks.has(c.id)).length;
+
+      if (!user) return (
+        <div className="auth-wrap">
+          <div className="auth-logo">vide<span className="dot d1"/><span className="dot d2"/><span style={{color:"#FF3D8B"}}>ai</span><span className="dot d3"/></div>
+          <div className="auth-sub">Vide ta maison, remplis ton compte 💰</div>
+          <div className="auth-tabs">
+            {[["signup","Créer un compte"],["login","Se connecter"]].map(([m,l])=>(
+              <button key={m} className={`auth-tab${authMode===m?" active":""}`} onClick={()=>{setAuthMode(m);setAuthErr({})}}>{l}</button>
+            ))}
+          </div>
+          <div className="auth-form">
+            {authMode==="signup" && <>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+                <div>
+                  <label className="auth-label">Prénom</label>
+                  <input className="auth-input" style={authErr.prenom?{borderColor:"#EF4444"}:{}} placeholder="Marie" value={authForm.prenom} onChange={e=>sf("prenom",e.target.value)}/>
+                  {authErr.prenom && <div className="auth-err">{authErr.prenom}</div>}
+                </div>
+                <div>
+                  <label className="auth-label">Nom</label>
+                  <input className="auth-input" placeholder="Dupont" value={authForm.nom} onChange={e=>sf("nom",e.target.value)}/>
+                </div>
+              </div>
+              <div className="auth-field">
+                <label className="auth-label">Ville</label>
+                <input className="auth-input" placeholder="Paris, Lyon…" value={authForm.ville} onChange={e=>sf("ville",e.target.value)}/>
+              </div>
+            </>}
+            <div className="auth-field">
+              <label className="auth-label">Email</label>
+              <input className="auth-input" style={authErr.email?{borderColor:"#EF4444"}:{}} type="email" placeholder="marie@email.com" value={authForm.email} onChange={e=>sf("email",e.target.value)}/>
+              {authErr.email && <div className="auth-err">{authErr.email}</div>}
+            </div>
+            <div className="auth-field">
+              <label className="auth-label">Mot de passe</label>
+              <input className="auth-input" style={authErr.password?{borderColor:"#EF4444"}:{}} type="password" placeholder="6 caractères minimum" value={authForm.password} onChange={e=>sf("password",e.target.value)}/>
+              {authErr.password && <div className="auth-err">{authErr.password}</div>}
+            </div>
+            <button className="btn-auth" disabled={authLoading} onClick={handleAuth}>
+              {authLoading?"⏳ Chargement…":authMode==="signup"?"🚀 Créer mon compte gratuit":"🔓 Se connecter"}
+            </button>
+            <div className="auth-divider">── ou continuer avec ──</div>
+            <button className="btn-social" onClick={()=>handleSocial("google")} disabled={authLoading}>🔵 Continuer avec Google</button>
+            <button className="btn-social" onClick={()=>handleSocial("facebook")} disabled={authLoading}>🔷 Continuer avec Facebook</button>
+            <div className="auth-legal">En créant un compte tu acceptes les Conditions d'utilisation et la Politique de confidentialité de VideMaison.ai</div>
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="app">
+          <header className="header">
+            <div className="header-top">
+              <div className="logo">vide<span className="dot d1"/><span className="dot d2"/><span style={{color:"#FF3D8B"}}>ai</span><span className="dot d3"/></div>
+              <div className="header-pills">
+                <div className="hpill yellow">📦 {items.length}</div>
+                <div className="hpill green" onClick={()=>setTab("profile")}>👤 {user.prenom}</div>
+              </div>
+            </div>
+            <div className="tabs">
+              {[{id:"scan",l:"📸 Scanner"},{id:"inventory",l:"📦 Inventaire"},{id:"publish",l:"🚀 Publier"},{id:"market",l:"📊 Marché"},{id:"org",l:"🗂️ Orga"},{id:"profile",l:"👤 Profil"}].map(t=>(
+                <button key={t.id} className={`tab${tab===t.id?" active":""}`}
+                  style={tab===t.id?{background:TC[t.id]}:{}}
+                  onClick={()=>setTab(t.id)}>{t.l}</button>
+              ))}
+            </div>
+          </header>
+
+          <div className="content">
+            {tab==="scan" && <>
+              <div className="section-title">Scanner des articles</div>
+              <div className="mode-pills">
+                {[{id:"fast",l:"⚡ Vide vite"},{id:"max",l:"💰 Maximise"},{id:"donate",l:"🤝 Tout donner"}].map(m=>(
+                  <button key={m.id} className={`mode-pill${mode===m.id?" active":""}`} onClick={()=>setMode(m.id)}>{m.l}</button>
+                ))}
+              </div>
+              <div style={{background:"#fff",borderRadius:18,padding:20,border:"2px solid #E8E0D0",marginBottom:12,textAlign:"center"}}>
+                <div style={{fontSize:44,marginBottom:8}}>{analyzing?"🔍":"📸"}</div>
+                <div style={{fontSize:14,fontWeight:800,color:"#1A1A1A",marginBottom:4}}>
+                  {analyzing?"Analyse IA en cours…":"Simule un scan d'articles"}
+                </div>
+                <div style={{fontSize:12,color:"#9CA3AF",fontWeight:600,marginBottom:16}}>
+                  {analyzing?"Identification · Estimation du prix…":"Sur l'app réelle tu utilises ta caméra ou ta galerie"}
+                </div>
+                {analyzing
+                  ? <div className="analyzing-bar"><div className="analyzing-fill"/></div>
+                  : <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
+                      {[["📷 1 photo",1],["📷📷 3 photos",3],["🗂️ Lot de 5",5]].map(([l,n])=>(
+                        <button key={n} onClick={()=>simulateScan(n)}
+                          style={{padding:"10px 16px",borderRadius:12,background:"linear-gradient(135deg,#FF3D8B,#7C3AED)",color:"#fff",fontWeight:900,fontSize:13,border:"none",cursor:"pointer",fontFamily:"'Nunito',sans-serif"}}>
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                }
+              </div>
+              {!analyzing && newCount>0 && <div className="scan-result">✅ {newCount} article(s) détecté(s) et ajouté(s) !</div>}
+              <div style={{marginTop:16,background:"#fff",borderRadius:16,padding:16,border:"2px solid #E8E0D0"}}>
+                <div style={{fontSize:14,fontWeight:900,marginBottom:10,color:"#1A1A1A"}}>Estimation actuelle</div>
+                <div style={{display:"flex",gap:12}}>
+                  <div style={{flex:1,background:"#DCFCE7",borderRadius:12,padding:12,textAlign:"center"}}>
+                    <div style={{fontSize:22,fontWeight:900,color:"#16A34A"}}>{totalVal}€</div>
+                    <div style={{fontSize:11,fontWeight:700,color:"#6B7280"}}>Valeur totale</div>
+                  </div>
+                  <div style={{flex:1,background:"#EDE9FE",borderRadius:12,padding:12,textAlign:"center"}}>
+                    <div style={{fontSize:22,fontWeight:900,color:"#7C3AED"}}>{items.length}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:"#6B7280"}}>Articles</div>
+                  </div>
+                  <div style={{flex:1,background:"#FFE0CC",borderRadius:12,padding:12,textAlign:"center"}}>
+                    <div style={{fontSize:22,fontWeight:900,color:"#FF6B00"}}>{totalProfit}€</div>
+                    <div style={{fontSize:11,fontWeight:700,color:"#6B7280"}}>Net estimé</div>
+                  </div>
+                </div>
+              </div>
+            </>}
+
+            {tab==="inventory" && <>
+              <div className="section-title">Inventaire</div>
+              <div className="filter-bar">
+                {[{id:"all",l:"Tous"},{id:"sel",l:"Sélectionnés"},{id:"rare",l:"⭐ Rares"},{id:"lot",l:"📦 Lots"}].map(f=>(
+                  <button key={f.id} className={`fbtn${filter===f.id?" active":""}`} onClick={()=>setFilter(f.id)}>{f.l}</button>
+                ))}
+              </div>
+              <div className="sel-count">{selected.size} sélectionné(s) · {totalVal}€</div>
+              {filtItems.map(it=>(
+                <div key={it.id} className={`item-card${selected.has(it.id)?" selected":""}`} onClick={()=>setDetail(it)}>
+                  <div className="item-emoji">{it.emoji}</div>
+                  <div className="item-info">
+                    <div className="item-name">{it.name}{it.badge&&<span className={`item-badge badge-${it.badge}`}>{it.badge==="rare"?"⭐ Rare":"📦 Lot"}</span>}</div>
+                    <div className="item-meta">{it.cat} · {it.state}</div>
+                    <div className="score-bar"><div className="score-fill" style={{width:it.score+"%",height:4}}/></div>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
+                    <div className="item-price">{it.price}€</div>
+                    <div style={{fontSize:18,cursor:"pointer"}} onClick={e=>{e.stopPropagation();toggleSel(it.id)}}>{selected.has(it.id)?"✅":"⬜"}</div>
+                  </div>
+                </div>
+              ))}
+            </>}
+
+            {tab==="publish" && <>
+              <div className="section-title">Publier les annonces</div>
+              {PLATFORMS.map(p=>(
+                <div key={p.id} className={`plat-card${platforms.has(p.id)?" active":""}`} onClick={()=>togglePlat(p.id)}>
+                  <div className="plat-emoji">{p.emoji}</div>
+                  <div><div className="plat-name">{p.name}</div><div className="plat-fee">Commission : {p.fee}</div></div>
+                  <div className={`plat-check${platforms.has(p.id)?" on":""}`}>{platforms.has(p.id)?"✓":""}</div>
+                </div>
+              ))}
+              <div className="pub-summary">
+                <div className="pub-row"><span>Articles</span><span>{selItems.length}</span></div>
+                <div className="pub-row"><span>Plateformes</span><span>{platforms.size}</span></div>
+                <div className="pub-row"><span>Valeur totale</span><span>{totalVal}€</span></div>
+                <div className="pub-row" style={{color:"#16A34A",fontWeight:900,fontSize:16}}><span>💰 Dans ta poche</span><span>{totalProfit}€</span></div>
+              </div>
+              <button className="btn-publish" onClick={()=>setTab("success")}>🚀 Publier {selItems.length} annonce(s)</button>
+            </>}
+
+            {tab==="market" && <>
+              <div className="section-title">Tendances du marché</div>
+              <div className="alert-card">
+                <div className="alert-title">⭐ Article rare détecté !</div>
+                <div className="alert-text">Ton canapé 3 places est très demandé (+34%). Prix conseillé : 220€</div>
+              </div>
+              <div className="market-card">
+                <div className="market-title">📈 Tendances par catégorie</div>
+                {[["Meubles","+12%",true],["Électroménager","+8%",true],["Déco","-3%",false],["Vêtements","+22%",true],["Sport","+5%",true]].map(([cat,t,up])=>(
+                  <div key={cat} className="trend-row"><span style={{fontWeight:700}}>{cat}</span><span className={up?"trend-up":"trend-down"}>{t}</span></div>
+                ))}
+              </div>
+              <div className="market-card">
+                <div className="market-title">⏰ Meilleurs créneaux</div>
+                <div className="slot-row">
+                  {[["Dim 10h",true],["Sam 9h",true],["Ven 18h",false],["Lun 12h",false],["Mar 20h",false]].map(([s,b])=>(
+                    <div key={s} className={`slot ${b?"best":"ok"}`}>{s}</div>
+                  ))}
+                </div>
+              </div>
+              <div className="market-card">
+                <div className="market-title">🤖 Conseils IA</div>
+                <div style={{fontSize:13,fontWeight:600,color:"#6B7280",lineHeight:1.7}}>
+                  • Publie le canapé ce dimanche matin<br/>
+                  • Regroupe la vaisselle en lot (+40% de chances)<br/>
+                  • Baisse le vélo de 10€ pour vendre vite
+                </div>
+              </div>
+            </>}
+
+            {tab==="org" && <>
+              <div className="section-title">Organisation</div>
+              <div style={{fontSize:13,fontWeight:700,color:"#6B7280",marginBottom:8}}>{clDone}/{CHECKLIST.length} pièces vérifiées</div>
+              <div className="progress-bar"><div className="progress-fill" style={{width:(clDone/CHECKLIST.length*100)+"%"}}/></div>
+              {rooms.map(room=>(
+                <div key={room} className="room-block">
+                  <div className="room-label">🏠 {room}</div>
+                  {CHECKLIST.filter(c=>c.room===room).map(c=>(
+                    <div key={c.id} className="check-row" onClick={()=>toggleCheck(c.id)}>
+                      <div className={`check-box${checks.has(c.id)?" done":""}`}>{checks.has(c.id)?"✓":""}</div>
+                      <div className={`check-label${checks.has(c.id)?" done":""}`}>{c.label}</div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </>}
+
+            {tab==="profile" && <>
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",paddingTop:8}}>
+                <div className="profile-avatar">{user.prenom[0]?.toUpperCase()}</div>
+                <div className="profile-name">{user.prenom} {user.nom}</div>
+                <div className="profile-meta">📍 {user.ville} · Membre depuis {user.since}</div>
+              </div>
+              <div className="stat-grid">
+                <div className="stat-box"><div className="stat-num">{items.length}</div><div className="stat-lbl">Articles</div></div>
+                <div className="stat-box"><div className="stat-num" style={{color:"#16A34A"}}>{totalVal}€</div><div className="stat-lbl">Valeur</div></div>
+                <div className="stat-box"><div className="stat-num" style={{color:"#7C3AED"}}>{Math.round(clDone/CHECKLIST.length*100)}%</div><div className="stat-lbl">Checklist</div></div>
+              </div>
+              <div className="profile-section">
+                <div className="profile-section-title">Mon compte</div>
+                {[["📧",user.email],["📍",user.ville||"Non renseigné"],["🔔","Notifications"],["🔒","Sécurité"]].map(([ic,lb],i)=>(
+                  <div key={i} className="profile-row"><span style={{fontSize:18}}>{ic}</span><span style={{flex:1,paddingLeft:10}}>{lb}</span><span style={{color:"#9CA3AF"}}>›</span></div>
+                ))}
+              </div>
+              <div className="profile-section">
+                <div className="profile-section-title">Mes ventes</div>
+                {[["📦","Mes annonces"],["💰","Historique"],["⭐","Mes avis"]].map(([ic,lb],i)=>(
+                  <div key={i} className="profile-row"><span style={{fontSize:18}}>{ic}</span><span style={{flex:1,paddingLeft:10}}>{lb}</span><span style={{color:"#9CA3AF"}}>›</span></div>
+                ))}
+              </div>
+              <div style={{background:"linear-gradient(135deg,#7C3AED,#FF3D8B)",borderRadius:16,padding:16,marginBottom:12,color:"#fff"}}>
+                <div style={{fontSize:15,fontWeight:900,marginBottom:4}}>✨ Passe à VideMaison Pro</div>
+                <div style={{fontSize:12,fontWeight:600,opacity:.9,marginBottom:10,lineHeight:1.5}}>Publication illimitée · Chatbot auto · Stats avancées</div>
+                <div style={{fontSize:28,fontWeight:900,marginBottom:10}}>9,90€ <span style={{fontSize:13,opacity:.8}}>/mois</span></div>
+                <button style={{width:"100%",padding:12,borderRadius:12,background:"#fff",color:"#7C3AED",fontWeight:900,fontSize:14,border:"none",cursor:"pointer",fontFamily:"'Nunito',sans-serif"}}>Essayer 14 jours gratuit</button>
+              </div>
+              <button className="btn-logout" onClick={()=>{setUser(null);setAuthForm({prenom:"",nom:"",email:"",password:"",ville:""});setAuthErr({})}}>🚪 Se déconnecter</button>
+            </>}
+
+            {tab==="success" && (
+              <div className="success-screen">
+                <div className="success-icon">🎉</div>
+                <div className="success-title">Annonces publiées !</div>
+                <div className="success-sub">{selItems.length} articles sur {platforms.size} plateforme(s)<br/>Tu peux recevoir jusqu'à {totalProfit}€</div>
+                <button className="btn-reset" onClick={()=>setTab("inventory")}>Voir l'inventaire</button>
+              </div>
+            )}
+          </div>
+
+          {tab!=="success" && tab!=="org" && tab!=="profile" && (
+            <div className="pub-bar">
+              <div>
+                <div className="bar-stat">{selItems.length} articles · {platforms.size} plateformes</div>
+                <div className="bar-val">{totalProfit}€ dans ta poche</div>
+              </div>
+              <button style={{padding:"10px 18px",borderRadius:12,background:"linear-gradient(135deg,#FF6B00,#FF3D8B)",color:"#fff",fontWeight:900,fontSize:13,border:"none",cursor:"pointer",fontFamily:"'Nunito',sans-serif"}} onClick={()=>setTab("publish")}>Publier →</button>
+            </div>
+          )}
+
+          {detail && (
+            <div className="panel-overlay" onClick={()=>setDetail(null)}>
+              <div className="panel" onClick={e=>e.stopPropagation()}>
+                <div className="panel-emoji">{detail.emoji}</div>
+                <div className="panel-name">{detail.name}</div>
+                <div className="panel-cat">{detail.cat} · {detail.state}</div>
+                <div className="field-group">
+                  <div className="field-label">Description</div>
+                  <textarea className="field-input" rows={3} defaultValue={detail.desc}/>
+                </div>
+                <div className="field-group">
+                  <div className="field-label">Prix</div>
+                  <div className="price-input-wrap">
+                    <span className="currency">€</span>
+                    <input type="number" defaultValue={detail.price}/>
+                  </div>
+                  <div className="fees-breakdown" style={{marginTop:8}}>
+                    <div className="fee-row"><span>Prix de vente</span><span>{detail.price}€</span></div>
+                    <div className="fee-row"><span>Frais plateforme</span><span>-{detail.fee}€</span></div>
+                    <div className="fee-row total"><span>Tu reçois</span><span>{detail.profit}€</span></div>
+                  </div>
+                </div>
+                <div className="field-group">
+                  <div className="field-label">Score IA</div>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <div className="score-bar" style={{flex:1,height:6}}><div className="score-fill" style={{width:detail.score+"%",height:6}}/></div>
+                    <span style={{fontSize:14,fontWeight:700,color:"#7C3AED"}}>{detail.score}%</span>
+                  </div>
+                </div>
+                {detail.tips?.length>0 && (
+                  <div className="field-group">
+                    <div className="field-label">Conseils IA</div>
+                    <div className="tips">{detail.tips.map((t,i)=><div key={i} className="tip">💡 {t}</div>)}</div>
+                  </div>
+                )}
+                <button className="btn-close-panel" onClick={()=>setDetail(null)}>Valider</button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
