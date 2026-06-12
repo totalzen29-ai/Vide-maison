@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+  <title>VideMaison.ai</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#FF6B00"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="VideMaison"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body,#root{height:100%;background:#FFFBF0}
+    body{font-family:'Nunito',sans-serif;-webkit-font-smoothing:antialiased}
+
+    /* CONFIG BANNER */
+    .cfg-banner{background:#FFF3CD;border:2px solid #FFD600;border-radius:12px;padding:14px 16px;margin:12px;font-size:13px;font-weight:700;color:#92400E;line-height:1.5}
+    .cfg-banner input{width:100%;margin-top:6px;padding:8px 10px;border:2px solid #E8E0D0;border-radius:8px;font-size:13px;font-family:'Nunito',sans-serif;font-weight:700}
+    .cfg-banner button{margin-top:8px;width:100%;padding:10px;border-radius:10px;background:#FF6B00;color:#fff;border:none;font-weight:900;font-size:14px;cursor:pointer;font-family:'Nunito',sans-serif}
+
+    /* PLAN BADGE */
+    .plan-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:900;cursor:pointer}
+    .plan-free{background:#F3F0E8;color:#6B7280}
+    .plan-essentiel{background:#FFF3CD;color:#92400E}
+    .plan-pro{background:linear-gradient(135deg,#FF3D8B22,#7C3AED22);color:#7C3AED;border:1px solid #7C3AED44}
+
+    /* APP */
+    .app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:#FFFBF0}
+    .header{background:#fff;border-bottom:2px solid #E8E0D0;padding:12px 16px 0;position:sticky;top:0;z-index:100}
+    .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .logo{font-size:22px;font-weight:900;letter-spacing:-0.5px}
+    .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin:0 1px;vertical-align:middle}
+    .d1{background:#FFD600}.d2{background:#FF6B00}.d3{background:#FF3D8B}
+    .tabs{display:flex;gap:4px;overflow-x:auto;padding:0 4px 10px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex-shrink:0;padding:7px 14px;border-radius:20px;border:2px solid #E8E0D0;background:#fff;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;color:#1A1A1A}
+    .tab.active{background:#1A1A1A;color:#fff;border-color:#1A1A1A}
+
+    /* SCAN AREA */
+    .scan-area{margin:16px;border:2px dashed #E8E0D0;border-radius:20px;padding:24px 20px;text-align:center;background:#fff}
+    .scan-icon{font-size:36px;margin-bottom:8px}
+    .scan-title{font-size:15px;font-weight:800;color:#1A1A1A;margin-bottom:4px}
+    .scan-sub{font-size:12px;color:#9CA3AF;font-weight:600;margin-bottom:16px}
+    .scan-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+    .scan-btn{padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,#FF3D8B,#7C3AED);color:#fff;font-weight:900;font-size:13px;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+    .scan-btn.cam{background:linear-gradient(135deg,#FF6B00,#FFD600);color:#1A1A1A}
+    .scan-btn.manual{background:#F3F0E8;color:#1A1A1A;border:2px solid #E8E0D0}
+    .scan-btn:disabled{opacity:.45;cursor:not-allowed}
+
+    /* UPSELL */
+    .upsell{margin:0 16px 16px;background:linear-gradient(135deg,#FF3D8B11,#7C3AED11);border:2px solid #7C3AED33;border-radius:16px;padding:16px;text-align:center}
+    .upsell-title{font-size:14px;font-weight:900;color:#7C3AED;margin-bottom:6px}
+    .upsell-sub{font-size:12px;font-weight:600;color:#6B7280;margin-bottom:12px;line-height:1.5}
+    .upsell-btn{padding:10px 20px;border-radius:12px;background:linear-gradient(135deg,#FF3D8B,#7C3AED);color:#fff;font-weight:900;font-size:13px;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+
+    /* PROGRESS */
+    .progress-wrap{margin:0 16px 16px;background:#fff;border-radius:16px;border:2px solid #E8E0D0;overflow:hidden}
+    .progress-item{padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #F3F0E8}
+    .progress-item:last-child{border-bottom:none}
+    .progress-img{width:44px;height:44px;border-radius:8px;object-fit:cover;background:#F3F0E8;flex-shrink:0}
+    .progress-img.placeholder{display:flex;align-items:center;justify-content:center;font-size:20px}
+    .progress-info{flex:1;min-width:0}
+    .progress-name{font-size:13px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .progress-status{font-size:11px;font-weight:700;margin-top:2px}
+    .status-loading{color:#FF6B00}.status-done{color:#16A34A}.status-err{color:#EF4444}
+    .progress-bar-outer{height:4px;background:#F3F0E8;border-radius:4px;margin-top:6px;overflow:hidden}
+    .progress-bar-inner{height:4px;background:linear-gradient(90deg,#FF3D8B,#7C3AED);border-radius:4px;animation:slide 1.2s ease-in-out infinite}
+    @keyframes slide{0%{width:20%}50%{width:80%}100%{width:20%}}
+
+    /* ARTICLES */
+    .section-title{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#9CA3AF;padding:0 16px 8px}
+    .card{background:#fff;border-radius:16px;border:2px solid #E8E0D0;margin:0 16px 10px;overflow:hidden;cursor:pointer;transition:transform .15s}
+    .card:active{transform:scale(.98)}
+    .card-inner{display:flex;align-items:center;gap:12px;padding:12px}
+    .card-img{width:56px;height:56px;border-radius:10px;object-fit:cover;background:#F3F0E8;flex-shrink:0}
+    .card-img.emoji-thumb{display:flex;align-items:center;justify-content:center;font-size:24px}
+    .card-body{flex:1;min-width:0}
+    .card-name{font-size:14px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .card-meta{font-size:11px;font-weight:700;color:#9CA3AF;margin-top:2px}
+    .card-price{font-size:17px;font-weight:900;color:#FF6B00;flex-shrink:0}
+    .saiko-chip{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(135deg,#FF3D8B22,#7C3AED22);color:#7C3AED;font-size:10px;font-weight:900;padding:2px 7px;border-radius:20px;margin-top:4px;border:1px solid #7C3AED33}
+    .manual-chip{display:inline-flex;align-items:center;gap:3px;background:#F3F0E8;color:#9CA3AF;font-size:10px;font-weight:900;padding:2px 7px;border-radius:20px;margin-top:4px}
+
+    /* PANEL DETAIL */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;max-width:430px;left:50%;transform:translateX(-50%)}
+    .panel{background:#FFFBF0;border-radius:24px 24px 0 0;width:100%;padding:20px 20px 32px;max-height:88vh;overflow-y:auto}
+    .panel-img{width:100%;height:180px;object-fit:cover;border-radius:14px;margin-bottom:14px}
+    .panel-img.emoji-big{height:100px;display:flex;align-items:center;justify-content:center;font-size:56px;background:#F3F0E8;border-radius:14px;margin-bottom:14px}
+    .panel h3{font-size:18px;font-weight:900;margin-bottom:14px}
+    .field-group{margin-bottom:12px}
+    .field-label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#9CA3AF;margin-bottom:4px}
+    .field-value{font-size:14px;font-weight:700;color:#1A1A1A}
+    .fee-row{display:flex;justify-content:space-between;font-size:13px;font-weight:700;padding:3px 0;color:#6B7280}
+    .fee-row.total{color:#1A1A1A;font-weight:900;border-top:1px solid #E8E0D0;margin-top:4px;padding-top:6px}
+    .tips{display:flex;flex-direction:column;gap:6px}
+    .tip{background:#FFF9C4;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;color:#92400E}
+    .btn-close{width:100%;padding:14px;border-radius:14px;background:#1A1A1A;color:#fff;border:none;font-weight:900;font-size:15px;cursor:pointer;font-family:'Nunito',sans-serif}
+
+    /* FORMULAIRE MANUEL */
+    .form-panel{background:#FFFBF0;border-radius:24px 24px 0 0;width:100%;padding:20px 20px 32px;max-height:90vh;overflow-y:auto}
+    .form-panel h3{font-size:17px;font-weight:900;margin-bottom:16px}
+    .form-field{margin-bottom:14px}
+    .form-field label{display:block;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:#9CA3AF;margin-bottom:5px}
+    .form-field input,.form-field textarea,.form-field select{width:100%;padding:10px 12px;border:2px solid #E8E0D0;border-radius:10px;font-size:14px;font-family:'Nunito',sans-serif;font-weight:700;background:#fff;color:#1A1A1A;outline:none}
+    .form-field input:focus,.form-field textarea:focus,.form-field select:focus{border-color:#7C3AED}
+    .form-field textarea{resize:vertical;min-height:70px}
+    .form-photo-btn{width:100%;padding:12px;border-radius:10px;border:2px dashed #E8E0D0;background:#F9F7F2;font-size:13px;font-weight:800;color:#9CA3AF;cursor:pointer;font-family:'Nunito',sans-serif}
+    .form-preview{width:100%;height:120px;object-fit:cover;border-radius:10px;margin-top:8px}
+    .btn-submit{width:100%;padding:14px;border-radius:14px;background:#1A1A1A;color:#fff;border:none;font-weight:900;font-size:15px;cursor:pointer;margin-top:4px;font-family:'Nunito',sans-serif}
+    .btn-cancel{width:100%;padding:12px;border-radius:14px;background:transparent;color:#9CA3AF;border:2px solid #E8E0D0;font-weight:800;font-size:14px;cursor:pointer;margin-top:8px;font-family:'Nunito',sans-serif}
+
+    /* PLANS PAGE */
+    .plans-page{padding:16px}
+    .plan-card{background:#fff;border:2px solid #E8E0D0;border-radius:18px;padding:18px;margin-bottom:12px}
+    .plan-card.active{border-color:#7C3AED;background:linear-gradient(135deg,#FF3D8B08,#7C3AED08)}
+    .plan-name{font-size:16px;font-weight:900;margin-bottom:4px}
+    .plan-price{font-size:22px;font-weight:900;color:#FF6B00;margin-bottom:10px}
+    .plan-price span{font-size:13px;font-weight:700;color:#9CA3AF}
+    .plan-features{list-style:none;display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+    .plan-features li{font-size:13px;font-weight:700;color:#374151}
+    .plan-features li::before{content:"✓ ";color:#16A34A;font-weight:900}
+    .plan-features li.no::before{content:"✗ ";color:#E8E0D0}
+    .plan-features li.no{color:#C9C0B0}
+    .btn-plan{width:100%;padding:12px;border-radius:12px;font-weight:900;font-size:14px;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+    .btn-plan.current{background:#F3F0E8;color:#9CA3AF;cursor:default}
+    .btn-plan.upgrade{background:linear-gradient(135deg,#FF3D8B,#7C3AED);color:#fff}
+
+    /* EMPTY */
+    .empty{text-align:center;padding:48px 20px;color:#9CA3AF}
+    .empty-icon{font-size:48px;margin-bottom:12px}
+    .empty p{font-size:14px;font-weight:700}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useCallback } = React;
+
+const CATS = ["Électronique","Mobilier","Vêtements","Livres","Sport","Jouets","Électroménager","Décoration","Cuisine","Autre"];
+const ETATS = ["Comme neuf","Très bon état","Bon état","État correct","À rénover"];
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function fileToBase64(file) {
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(",")[1]);
+    r.onerror=()=>rej(new Error("Lecture échouée"));
+    r.readAsDataURL(file);
+  });
+}
+function mtype(file){
+  if(file.type) return file.type;
+  const e=file.name.split(".").pop().toLowerCase();
+  return e==="png"?"image/png":e==="webp"?"image/webp":"image/jpeg";
+}
+
+// ── CONFIG BANNER ─────────────────────────────────────────────────────────────
+function ConfigBanner({onSave}){
+  const [url,setUrl]=useState("");
+  const [key,setKey]=useState("");
+  return(
+    <div className="cfg-banner">
+      ⚙️ Configure Supabase pour activer Saiko :
+      <input placeholder="SUPABASE_URL (https://xxx.supabase.co)" value={url} onChange={e=>setUrl(e.target.value)}/>
+      <input placeholder="SUPABASE_ANON_KEY" value={key} onChange={e=>setKey(e.target.value)} style={{marginTop:6}}/>
+      <button onClick={()=>{if(url&&key)onSave(url.trim(),key.trim())}}>Enregistrer</button>
+    </div>
+  );
+}
+
+// ── FORMULAIRE MANUEL ─────────────────────────────────────────────────────────
+function ManualForm({onAdd,onClose}){
+  const [nom,setNom]=useState("");
+  const [cat,setCat]=useState("Autre");
+  const [etat,setEtat]=useState("Bon état");
+  const [prix,setPrix]=useState("");
+  const [desc,setDesc]=useState("");
+  const [imgUrl,setImgUrl]=useState(null);
+  const photoRef=useRef();
+
+  const handlePhoto=e=>{
+    const f=e.target.files?.[0];
+    if(f) setImgUrl(URL.createObjectURL(f));
+    e.target.value="";
+  };
+
+  const submit=()=>{
+    if(!nom.trim()||!prix) return;
+    const p=parseInt(prix)||0;
+    const frais=Math.round(p*0.05);
+    onAdd({
+      id:`${Date.now()}-${Math.random()}`,
+      nom:nom.trim(), categorie:cat, etat, prix:p,
+      frais, net:p-frais,
+      description:desc.trim()||"",
+      score:null, conseils:[],
+      imgUrl, source:"manuel", ts:Date.now(),
+    });
+    onClose();
+  };
+
+  return(
+    <div className="overlay" onClick={onClose}>
+      <div className="form-panel" onClick={e=>e.stopPropagation()}>
+        <h3>✏️ Ajouter manuellement</h3>
+        <div className="form-field">
+          <label>Nom de l'article *</label>
+          <input value={nom} onChange={e=>setNom(e.target.value)} placeholder="Ex : Lampe de salon"/>
+        </div>
+        <div className="form-field">
+          <label>Catégorie</label>
+          <select value={cat} onChange={e=>setCat(e.target.value)}>
+            {CATS.map(c=><option key={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="form-field">
+          <label>État</label>
+          <select value={etat} onChange={e=>setEtat(e.target.value)}>
+            {ETATS.map(e=><option key={e}>{e}</option>)}
+          </select>
+        </div>
+        <div className="form-field">
+          <label>Prix de vente (€) *</label>
+          <input type="number" min="0" value={prix} onChange={e=>setPrix(e.target.value)} placeholder="15"/>
+        </div>
+        <div className="form-field">
+          <label>Description (optionnel)</label>
+          <textarea value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Détails utiles pour l'annonce…"/>
+        </div>
+        <div className="form-field">
+          <label>Photo (optionnel)</label>
+          <button className="form-photo-btn" onClick={()=>photoRef.current?.click()}>
+            {imgUrl?"📷 Changer la photo":"📷 Ajouter une photo"}
+          </button>
+          <input ref={photoRef} type="file" accept="image/*" style={{display:"none"}} onChange={handlePhoto}/>
+          {imgUrl && <img src={imgUrl} className="form-preview" alt=""/>}
+        </div>
+        <button className="btn-submit" onClick={submit} disabled={!nom.trim()||!prix}>
+          Ajouter à l'inventaire
+        </button>
+        <button className="btn-cancel" onClick={onClose}>Annuler</button>
+      </div>
+    </div>
+  );
+}
+
+// ── PAGE PLANS ────────────────────────────────────────────────────────────────
+function PlansPage({plan,onSelect,onClose}){
+  const plans=[
+    {id:"gratuit",name:"🆓 Gratuit",price:"0€",unit:"/mois",
+     features:["Saisie manuelle illimitée","Photo optionnelle","Calcul frais LeBonCoin"],
+     locked:["Scan Saiko (IA)","Score vendabilité","Conseils IA","Export PDF"]},
+    {id:"essentiel",name:"⚡ Essentiel",price:"4,99€",unit:"/mois",
+     features:["Tout le Gratuit","20 scans Saiko/mois","Score vendabilité","Conseils IA","Export PDF"],
+     locked:["Accès partagé famille","Mode Succession"]},
+    {id:"pro",name:"🚀 Pro",price:"9,99€",unit:"/mois",
+     features:["Tout l'Essentiel","Scans Saiko illimités","Accès partagé (lien invite)","Réservations famille","Mode Succession"],
+     locked:[]},
+  ];
+  return(
+    <div className="overlay" onClick={onClose}>
+      <div className="panel" style={{maxHeight:"92vh"}} onClick={e=>e.stopPropagation()}>
+        <h3 style={{marginBottom:16}}>✨ Choisir un plan</h3>
+        <div className="plans-page" style={{padding:0}}>
+          {plans.map(p=>(
+            <div key={p.id} className={`plan-card${plan===p.id?" active":""}`}>
+              <div className="plan-name">{p.name}</div>
+              <div className="plan-price">{p.price}<span> {p.unit}</span></div>
+              <ul className="plan-features">
+                {p.features.map(f=><li key={f}>{f}</li>)}
+                {p.locked.map(f=><li key={f} className="no">{f}</li>)}
+              </ul>
+              <button
+                className={`btn-plan${plan===p.id?" current":" upgrade"}`}
+                onClick={()=>{ if(plan!==p.id){ onSelect(p.id); onClose(); } }}
+              >
+                {plan===p.id?"Plan actuel":"Choisir ce plan"}
+              </button>
+            </div>
+          ))}
+        </div>
+        <button className="btn-cancel" style={{marginTop:8}} onClick={onClose}>Fermer</button>
+      </div>
+    </div>
+  );
+}
+
+// ── ARTICLE CARD ──────────────────────────────────────────────────────────────
+function ArticleCard({article:a,onClick}){
+  return(
+    <div className="card" onClick={onClick}>
+      <div className="card-inner">
+        {a.imgUrl
+          ?<img src={a.imgUrl} className="card-img" alt={a.nom}/>
+          :<div className="card-img emoji-thumb">📦</div>
+        }
+        <div className="card-body">
+          <div className="card-name">{a.nom}</div>
+          <div className="card-meta">{a.categorie} · {a.etat}</div>
+          {a.source==="saiko"
+            ?<div className="saiko-chip">✨ Saiko</div>
+            :<div className="manual-chip">✏️ Manuel</div>
+          }
+        </div>
+        <div className="card-price">{a.prix}€</div>
+      </div>
+    </div>
+  );
+}
+
+// ── DETAIL PANEL ──────────────────────────────────────────────────────────────
+function DetailPanel({article:d,onClose}){
+  return(
+    <div className="overlay" onClick={onClose}>
+      <div className="panel" onClick={e=>e.stopPropagation()}>
+        {d.imgUrl
+          ?<img src={d.imgUrl} className="panel-img" alt={d.nom}/>
+          :<div className="panel-img emoji-big">📦</div>
+        }
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+          <h3 style={{margin:0,flex:1}}>{d.nom}</h3>
+          {d.source==="saiko"
+            ?<div className="saiko-chip">✨ Analysé par Saiko</div>
+            :<div className="manual-chip">✏️ Saisie manuelle</div>
+          }
+        </div>
+        <div className="field-group">
+          <div className="field-label">Catégorie · État</div>
+          <div className="field-value">{d.categorie} — {d.etat}</div>
+        </div>
+        {d.description&&(
+          <div className="field-group">
+            <div className="field-label">Description</div>
+            <div className="field-value" style={{lineHeight:1.5,fontWeight:600}}>{d.description}</div>
+          </div>
+        )}
+        <div className="field-group">
+          <div className="field-label">Prix & frais LeBonCoin</div>
+          <div className="fee-row"><span>Prix de vente</span><span>{d.prix}€</span></div>
+          <div className="fee-row"><span>Frais plateforme (~5%)</span><span>-{d.frais}€</span></div>
+          <div className="fee-row total"><span>Tu reçois</span><span>{d.net}€</span></div>
+        </div>
+        {d.score!==null&&(
+          <div className="field-group">
+            <div className="field-label">Score vendabilité Saiko</div>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginTop:4}}>
+              <div style={{flex:1,height:6,background:"#F3F0E8",borderRadius:4,overflow:"hidden"}}>
+                <div style={{height:6,width:d.score+"%",background:"linear-gradient(90deg,#FF3D8B,#7C3AED)",borderRadius:4}}/>
+              </div>
+              <span style={{fontSize:14,fontWeight:900,color:"#7C3AED"}}>{d.score}%</span>
+            </div>
+          </div>
+        )}
+        {d.conseils?.length>0&&(
+          <div className="field-group">
+            <div className="field-label">Conseils Saiko</div>
+            <div className="tips">
+              {d.conseils.map((c,i)=><div key={i} className="tip">💡 {c}</div>)}
+            </div>
+          </div>
+        )}
+        <button className="btn-close" onClick={onClose}>Fermer</button>
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN APP ──────────────────────────────────────────────────────────────────
+function App(){
+  const [config,setConfig]=useState(()=>{
+    try{ const c=JSON.parse(localStorage.getItem("vm_config")||"{}"); return(c.url&&c.key)?c:null; }catch{return null;}
+  });
+  const [plan,setPlan]=useState(()=>localStorage.getItem("vm_plan")||"gratuit");
+  const [tab,setTab]=useState("scan");
+  const [articles,setArticles]=useState([]);
+  const [queue,setQueue]=useState([]);
+  const [detail,setDetail]=useState(null);
+  const [showManual,setShowManual]=useState(false);
+  const [showPlans,setShowPlans]=useState(false);
+  const [showUpsell,setShowUpsell]=useState(false);
+  const fileRef=useRef(); const camRef=useRef();
+
+  const saveConfig=(url,key)=>{
+    const c={url,key}; localStorage.setItem("vm_config",JSON.stringify(c)); setConfig(c);
+  };
+  const savePlan=(p)=>{ localStorage.setItem("vm_plan",p); setPlan(p); };
+
+  const canSaiko=plan==="essentiel"||plan==="pro";
+  const edgeUrl=config?`${config.url}/functions/v1/scan-article`:null;
+
+  // scans restants essentiel
+  const [scanCount,setScanCount]=useState(()=>parseInt(localStorage.getItem("vm_scan_count")||"0"));
+  const scansLeft=plan==="essentiel"?Math.max(0,20-scanCount):null;
+
+  const analyzeFile=useCallback(async(file,qid)=>{
+    if(!edgeUrl||!config) return;
+    setQueue(q=>q.map(x=>x.id===qid?{...x,status:"loading"}:x));
+    try{
+      const b64=await fileToBase64(file);
+      const res=await fetch(edgeUrl,{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":`Bearer ${config.key}`},
+        body:JSON.stringify({image_base64:b64,media_type:mtype(file)}),
+      });
+      const data=await res.json();
+      if(!data.ok) throw new Error(data.error||"Erreur Edge Function");
+      const a=data.article;
+      const newA={
+        id:qid, nom:a.nom, categorie:a.categorie, etat:a.etat,
+        prix:a.prix, frais:a.frais, net:a.net,
+        score:a.score, description:a.description, conseils:a.conseils||[],
+        imgUrl:URL.createObjectURL(file), source:"saiko", ts:Date.now(),
+      };
+      const nc=scanCount+1; setScanCount(nc); localStorage.setItem("vm_scan_count",nc);
+      setQueue(q=>q.map(x=>x.id===qid?{...x,status:"done",nom:a.nom}:x));
+      setArticles(prev=>[newA,...prev]);
+      setTimeout(()=>setQueue(q=>q.filter(x=>x.id!==qid)),2000);
+    }catch(e){
+      setQueue(q=>q.map(x=>x.id===qid?{...x,status:"error",err:e.message}:x));
+      setTimeout(()=>setQueue(q=>q.filter(x=>x.id!==qid)),4000);
+    }
+  },[edgeUrl,config,scanCount]);
+
+  const handleFiles=useCallback((files)=>{
+    if(!files.length) return;
+    if(!canSaiko){ setShowUpsell(true); return; }
+    if(plan==="essentiel"&&scansLeft<=0){ setShowUpsell(true); return; }
+    const arr=Array.from(files).slice(0,10);
+    const items=arr.map(f=>({id:`${Date.now()}-${Math.random()}`,file:f,name:f.name,previewUrl:URL.createObjectURL(f),status:"pending"}));
+    setQueue(prev=>[...prev,...items]);
+    setTab("scan");
+    items.forEach(item=>analyzeFile(item.file,item.id));
+  },[analyzeFile,canSaiko,plan,scansLeft]);
+
+  const planLabel={ gratuit:"🆓 Gratuit", essentiel:"⚡ Essentiel", pro:"🚀 Pro" }[plan];
+  const planClass={ gratuit:"plan-free", essentiel:"plan-essentiel", pro:"plan-pro" }[plan];
+
+  return(
+    <div className="app">
+      {/* Header */}
+      <div className="header">
+        <div className="header-top">
+          <div className="logo">VideMaison<span className="dot d1"/><span className="dot d2"/><span className="dot d3"/></div>
+          <button className={`plan-badge ${planClass}`} onClick={()=>setShowPlans(true)}>
+            {planLabel} ▾
+          </button>
+        </div>
+        <div className="tabs">
+          {[["scan","📸 Scan"],["inventaire","📦 Inventaire"]].map(([k,l])=>(
+            <button key={k} className={`tab${tab===k?" active":""}`} onClick={()=>setTab(k)}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      {!config&&<ConfigBanner onSave={saveConfig}/>}
+
+      {/* TAB SCAN */}
+      {tab==="scan"&&(
+        <div style={{paddingBottom:24}}>
+          <div style={{height:16}}/>
+          <div className="scan-area">
+            <div className="scan-icon">{queue.length>0?"🔍":"📸"}</div>
+            <div className="scan-title">
+              {queue.length>0?"Saiko analyse…":"Ajouter des articles"}
+            </div>
+            <div className="scan-sub">
+              {queue.length>0
+                ?`${queue.filter(x=>x.status==="done").length}/${queue.length} analysé(s)`
+                :canSaiko
+                  ?(plan==="essentiel"?`${scansLeft} scan${scansLeft!==1?"s":""} Saiko restant${scansLeft!==1?"s":""}…`:"Scan IA illimité avec Saiko")
+                  :"Plan Gratuit · Saisie manuelle uniquement"
+              }
+            </div>
+            {queue.length===0&&(
+              <div className="scan-btns">
+                {canSaiko&&(
+                  <>
+                    <button className="scan-btn" disabled={!config} onClick={()=>fileRef.current?.click()}>
+                      ✨ Galerie Saiko
+                    </button>
+                    <button className="scan-btn cam" disabled={!config} onClick={()=>camRef.current?.click()}>
+                      📷 Photo Saiko
+                    </button>
+                  </>
+                )}
+                <button className="scan-btn manual" onClick={()=>setShowManual(true)}>
+                  ✏️ Saisir manuellement
+                </button>
+              </div>
+            )}
+          </div>
+
+          <input ref={fileRef} type="file" accept="image/*" multiple style={{display:"none"}}
+            onChange={e=>{if(e.target.files?.length)handleFiles(e.target.files);e.target.value="";}}/>
+          <input ref={camRef} type="file" accept="image/*" capture="environment" style={{display:"none"}}
+            onChange={e=>{if(e.target.files?.length)handleFiles(e.target.files);e.target.value="";}}/>
+
+          {/* Upsell si plan gratuit essaie de scanner */}
+          {showUpsell&&(
+            <div className="upsell">
+              <div className="upsell-title">✨ Débloquer Saiko</div>
+              <div className="upsell-sub">
+                {plan==="essentiel"
+                  ?"Tu as utilisé tes 20 scans du mois. Passe en Pro pour un accès illimité."
+                  :"Le scan IA Saiko est disponible dès le plan Essentiel (4,99€/mois)."}
+              </div>
+              <button className="upsell-btn" onClick={()=>{setShowUpsell(false);setShowPlans(true);}}>
+                Voir les plans
+              </button>
+            </div>
+          )}
+
+          {/* Progress */}
+          {queue.length>0&&(
+            <div className="progress-wrap">
+              {queue.map(item=>(
+                <div key={item.id} className="progress-item">
+                  {item.previewUrl
+                    ?<img src={item.previewUrl} className="progress-img" alt=""/>
+                    :<div className="progress-img placeholder">📦</div>
+                  }
+                  <div className="progress-info">
+                    <div className="progress-name">{item.status==="done"&&item.nom?item.nom:item.name}</div>
+                    {item.status==="loading"&&<><div className="progress-status status-loading">Saiko analyse…</div><div className="progress-bar-outer"><div className="progress-bar-inner"/></div></>}
+                    {item.status==="pending"&&<div className="progress-status status-loading">En attente…</div>}
+                    {item.status==="done"&&<div className="progress-status status-done">✅ Ajouté</div>}
+                    {item.status==="error"&&<div className="progress-status status-err">❌ {item.err||"Erreur"}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {articles.length>0&&(
+            <>
+              <div className="section-title">Derniers ajouts</div>
+              {articles.slice(0,3).map(a=><ArticleCard key={a.id} article={a} onClick={()=>setDetail(a)}/>)}
+              {articles.length>3&&(
+                <div style={{textAlign:"center",padding:"8px 0 0"}}>
+                  <button style={{background:"none",border:"none",fontWeight:800,fontSize:13,color:"#7C3AED",cursor:"pointer",fontFamily:"'Nunito',sans-serif"}} onClick={()=>setTab("inventaire")}>
+                    Voir les {articles.length} articles →
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* TAB INVENTAIRE */}
+      {tab==="inventaire"&&(
+        <div style={{paddingBottom:24}}>
+          <div style={{height:16}}/>
+          {articles.length===0?(
+            <div className="empty">
+              <div className="empty-icon">📦</div>
+              <p>Aucun article pour l'instant.</p>
+              <p style={{marginTop:8}}>Scan Saiko ou saisie manuelle depuis 📸</p>
+            </div>
+          ):(
+            <>
+              <div className="section-title">{articles.length} article{articles.length!==1?"s":""}</div>
+              {articles.map(a=><ArticleCard key={a.id} article={a} onClick={()=>setDetail(a)}/>)}
+            </>
+          )}
+        </div>
+      )}
+
+      {detail&&<DetailPanel article={detail} onClose={()=>setDetail(null)}/>}
+      {showManual&&<ManualForm onAdd={a=>setArticles(prev=>[a,...prev])} onClose={()=>setShowManual(false)}/>}
+      {showPlans&&<PlansPage plan={plan} onSelect={savePlan} onClose={()=>setShowPlans(false)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+<script>
+  if('serviceWorker' in navigator)
+    navigator.serviceWorker.register('/sw.js');
+</script>
+</body>
+</html>
