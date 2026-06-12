@@ -1,0 +1,13 @@
+{
+  "name": "VideMaison",
+  "short_name": "VideMaison",
+  "description": "Vide ta maison, vends plus vite",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFBF0",
+  "theme_color": "#FF6B00",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
